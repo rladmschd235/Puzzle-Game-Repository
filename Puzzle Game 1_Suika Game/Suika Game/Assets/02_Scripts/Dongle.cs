@@ -1,18 +1,24 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Dongle : MonoBehaviour
 {
+    public GameManager manager;
+
     private Rigidbody2D rigid;
+    private CircleCollider2D circle;
     private Animator anim;
 
     public int level;
     public bool isDrag;
+    public bool isMerge;
 
     private void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
+        circle = GetComponent<CircleCollider2D>();
         anim = GetComponent<Animator>();
     }
 
@@ -47,5 +53,84 @@ public class Dongle : MonoBehaviour
     {
         isDrag= false;
         rigid.simulated = true; // 물리작용 활성화
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if(collision.gameObject.tag == "Dongle") // 충돌한 게임 오브젝트의 태그가 "Dongle"인가
+        {
+            Dongle other = collision.gameObject.GetComponent<Dongle>();
+
+            // 합치기 로직 실행 조건: 충돌한 오브젝트 레벨 == 내 레벨, 둘 다 합치기 로직 실행 중 X, 레벨 7보다 작아야한다.
+            if (level == other.level && !isMerge && !other.isMerge && level < 7) 
+            {
+                // 나와 상대편 위치 가져오기
+                float meX = transform.position.x;
+                float meY = transform.position.y;
+                float otherX = collision.transform.position.x;
+                float otherY = collision.transform.position.y;
+
+                // 내가 아래에 있을 때 또는 동일한 높이일 때, 내가 오른쪽에 있을 때 
+                if (meY < otherY || (meY == otherY && meX > otherX))
+                {
+                    // 충돌 오브젝트 비활성화
+                    other.Hide(transform.position);
+
+                    // 현재 오브젝트 레벨 업
+                    LevelUp();
+                }
+            }
+        }
+    }
+
+    // 합쳐지는 오브젝트 기능을 비활성화시키는 함수
+    private void Hide(Vector3 targetPos) 
+    {
+        isMerge = true;
+        rigid.simulated = false;
+        circle.enabled = false;
+
+        StartCoroutine(HideRoutine(targetPos));
+    }
+
+    // 합쳐질 오브젝트를 레벨 업 오브젝트로 이동시키는 함수
+    IEnumerator HideRoutine(Vector3 targetPos)
+    {
+        int frameCount = 0;
+
+        while(frameCount < 20)
+        {
+            frameCount++;
+            transform.position = Vector3.Lerp(transform.position, targetPos, 0.5f);
+            yield return null;
+        }
+
+        isMerge = false;
+        gameObject.SetActive(false); // 이동이 다 끝났다면 오브젝트 비활성화
+    }
+
+    private void LevelUp()
+    {
+        isMerge = true;
+
+        rigid.velocity = Vector2.zero; // 물리속도 0으로 지정
+        rigid.angularVelocity = 0; // 양수면 시계 방향 회전, 음수면 반시계 방향 회전
+
+        StartCoroutine(LevelUpRoutine());
+    }
+
+    IEnumerator LevelUpRoutine()
+    {
+        yield return new WaitForSeconds(0.2f);
+
+        anim.SetInteger("Level", level + 1); // 레벨 업 된 애니메이션 출력
+
+        yield return new WaitForSeconds(0.3f);
+
+        level++; // 현재 레벨 1 증가
+
+        manager.maxLevel = Mathf.Max(level, manager.maxLevel);
+
+        isMerge = false;
     }
 }
