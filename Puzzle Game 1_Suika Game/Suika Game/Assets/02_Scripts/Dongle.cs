@@ -6,6 +6,7 @@ using UnityEngine;
 public class Dongle : MonoBehaviour
 {
     public GameManager manager;
+    public ParticleSystem effect;
 
     private Rigidbody2D rigid;
     private CircleCollider2D circle;
@@ -124,6 +125,7 @@ public class Dongle : MonoBehaviour
         yield return new WaitForSeconds(0.2f);
 
         anim.SetInteger("Level", level + 1); // 레벨 업 된 애니메이션 출력
+        EffectPlay(); // 이펙트 출력
 
         yield return new WaitForSeconds(0.3f);
 
@@ -132,5 +134,12 @@ public class Dongle : MonoBehaviour
         manager.maxLevel = Mathf.Max(level, manager.maxLevel);
 
         isMerge = false;
+    }
+
+    private void EffectPlay()
+    {
+        effect.transform.position = transform.position;
+        effect.transform.localScale = transform.localScale;
+        effect.Play();
     }
 }
