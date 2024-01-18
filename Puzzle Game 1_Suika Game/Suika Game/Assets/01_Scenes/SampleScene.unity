@@ -500,6 +500,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 120d7ece7ac820e4384827deae388308, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  donglePool: []
+  effectPool: []
+  poolSize: 5
+  poolCusor: 0
   lastDongle: {fileID: 0}
   donglePrefab: {fileID: 4968330322566411759, guid: ea1298a10c4369947b247400e2d430e3, type: 3}
   dongleGroup: {fileID: 1006491882}
@@ -519,7 +523,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: f6fa03999a0597a4fa8cdf6619791c13, type: 3}
   - {fileID: 8300000, guid: 7f5efdc907e256345ab7072a2e68f071, type: 3}
   score: 0
-  maxLevel: 2
+  maxLevel: 1
   isOver: 0
 --- !u!4 &446425593
 Transform:
