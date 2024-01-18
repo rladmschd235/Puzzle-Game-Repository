@@ -18,12 +18,14 @@ public class Dongle : MonoBehaviour
     public int level;
     public bool isDrag;
     public bool isMerge;
+    public bool isAttach;
 
     private void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
         circle = GetComponent<CircleCollider2D>();
         anim = GetComponent<Animator>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     private void OnEnable()
@@ -59,6 +61,26 @@ public class Dongle : MonoBehaviour
         rigid.simulated = true; // 물리작용 활성화
     }
 
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        StartCoroutine("AttachRoutine");
+    }
+
+    IEnumerator AttachRoutine()
+    {
+        if(isAttach)
+        {
+            yield break;
+        }
+
+        isAttach = true;
+        manager.SFXPlay(GameManager.SFX.Attach);
+
+        yield return new WaitForSeconds(0.2f);
+
+        isAttach = false;
+    }
+
     private void OnCollisionStay2D(Collision2D collision)
     {
         if(collision.gameObject.tag == "Dongle") // 충돌한 게임 오브젝트의 태그가 "Dongle"인가
@@ -68,6 +90,7 @@ public class Dongle : MonoBehaviour
             // 합치기 로직 실행 조건: 충돌한 오브젝트 레벨 == 내 레벨, 둘 다 합치기 로직 실행 중 X, 레벨 7보다 작아야한다.
             if (level == other.level && !isMerge && !other.isMerge && level < 7) 
             {
+
                 // 나와 상대편 위치 가져오기
                 float meX = transform.position.x;
                 float meY = transform.position.y;
@@ -144,6 +167,7 @@ public class Dongle : MonoBehaviour
 
         anim.SetInteger("Level", level + 1); // 레벨 업 된 애니메이션 출력
         EffectPlay(); // 이펙트 출력
+        manager.SFXPlay(GameManager.SFX.LevelUp);   
 
         yield return new WaitForSeconds(0.3f);
 
@@ -180,7 +204,7 @@ public class Dongle : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if(collision.tag == "Finish")
+        if (collision.tag == "Finish")
         {
             deadTime = 0;
             spriteRenderer.color = Color.white;

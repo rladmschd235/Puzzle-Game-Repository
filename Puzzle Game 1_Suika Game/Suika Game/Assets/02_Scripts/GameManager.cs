@@ -10,6 +10,12 @@ public class GameManager : MonoBehaviour
     public GameObject effectPrefab;
     public Transform effectGroup;
 
+    public AudioSource bgmPlayer;
+    public AudioSource[] sfxPlayer;
+    public AudioClip[] sfxClip;
+    public enum SFX { LevelUp, Next, Attach, Button, Over };
+    private int sfxCursor;
+
     public int score;
     public int maxLevel;
     public bool isOver;
@@ -21,6 +27,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        bgmPlayer.Play();
         NextDongle();
     }
 
@@ -50,6 +57,7 @@ public class GameManager : MonoBehaviour
         lastDongle.level = Random.Range(0, maxLevel);
         lastDongle.gameObject.SetActive(true);
 
+        SFXPlay(SFX.Next);
         StartCoroutine(WaitNext());
     }
 
@@ -114,5 +122,33 @@ public class GameManager : MonoBehaviour
             dongle.Hide(Vector3.up * 100);
             yield return new WaitForSeconds(0.1f);
         }
+
+        yield return new WaitForSeconds(1f);
+        SFXPlay(SFX.Over);
+    }
+
+    public void SFXPlay(SFX type)
+    {
+        switch (type)
+        {
+            case SFX.LevelUp:
+                sfxPlayer[sfxCursor].clip = sfxClip[Random.Range(0, 3)];
+                break;
+            case SFX.Next:
+                sfxPlayer[sfxCursor].clip = sfxClip[3];
+                break;
+            case SFX.Attach:
+                sfxPlayer[sfxCursor].clip = sfxClip[4];
+                break;
+            case SFX.Button:
+                sfxPlayer[sfxCursor].clip = sfxClip[5];
+                break;
+            case SFX.Over:
+                sfxPlayer[sfxCursor].clip = sfxClip[6];
+                break;
+        }
+
+        sfxPlayer[sfxCursor].Play();
+        sfxCursor = (sfxCursor + 1) % sfxPlayer.Length;
     }
 }

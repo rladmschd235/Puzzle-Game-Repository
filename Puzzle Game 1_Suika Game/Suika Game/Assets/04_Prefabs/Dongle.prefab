@@ -139,9 +139,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   manager: {fileID: 0}
   effect: {fileID: 0}
+  rigid: {fileID: 0}
   level: 0
   isDrag: 0
   isMerge: 0
+  isAttach: 0
 --- !u!95 &333935755075005546
 Animator:
   serializedVersion: 4
