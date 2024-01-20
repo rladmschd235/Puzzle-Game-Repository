@@ -101,14 +101,15 @@ public class Dongle : MonoBehaviour
         isAttach = false;
     }
 
-    private void OnCollisionStay2D(Collision2D collision)
+
+    private void OnCollisionEnter2D(Collision collision)
     {
-        if(collision.gameObject.tag == "Dongle") // 충돌한 게임 오브젝트의 태그가 "Dongle"인가
+        if (collision.gameObject.tag == "Dongle") // 충돌한 게임 오브젝트의 태그가 "Dongle"인가
         {
             Dongle other = collision.gameObject.GetComponent<Dongle>();
 
             // 합치기 로직 실행 조건: 충돌한 오브젝트 레벨 == 내 레벨, 둘 다 합치기 로직 실행 중 X, 레벨 7보다 작아야한다.
-            if (level == other.level && !isMerge && !other.isMerge && level < 7) 
+            if (level == other.level && !isMerge && !other.isMerge && level < 7)
             {
 
                 // 나와 상대편 위치 가져오기
@@ -205,17 +206,18 @@ public class Dongle : MonoBehaviour
         effect.Play();
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnTriggerStay2D(Collider2D collision)
     {
         if(collision.tag == "Finish")
         {
+            Debug.Log("게임오버 실행");
             deadTime += Time.deltaTime;
 
-            if(deadTime > 2)
+            if(deadTime > 2f)
             {
                 spriteRenderer.color = Color.red;
             }
-            if(deadTime > 5)
+            if(deadTime > 5f)
             {
                 manager.GameOver();     
             }
@@ -226,6 +228,7 @@ public class Dongle : MonoBehaviour
     {
         if (collision.tag == "Finish")
         {
+            Debug.Log("게임 오버 중지");
             deadTime = 0;
             spriteRenderer.color = Color.white;
         }
