@@ -101,8 +101,7 @@ public class Dongle : MonoBehaviour
         isAttach = false;
     }
 
-
-    private void OnCollisionEnter2D(Collision collision)
+    private void OnCollisionStay2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Dongle") // 충돌한 게임 오브젝트의 태그가 "Dongle"인가
         {
@@ -210,7 +209,6 @@ public class Dongle : MonoBehaviour
     {
         if(collision.tag == "Finish")
         {
-            Debug.Log("게임오버 실행");
             deadTime += Time.deltaTime;
 
             if(deadTime > 2f)
@@ -228,7 +226,6 @@ public class Dongle : MonoBehaviour
     {
         if (collision.tag == "Finish")
         {
-            Debug.Log("게임 오버 중지");
             deadTime = 0;
             spriteRenderer.color = Color.white;
         }

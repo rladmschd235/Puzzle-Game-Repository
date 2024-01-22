@@ -252,10 +252,10 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetButtonDown("Cancle"))
-        {
-            Application.Quit();
-        }
+        //if(Input.GetButtonDown("Cancle"))
+        //{
+        //    Application.Quit();
+        //}
     }
 
     private void LateUpdate()
