@@ -10,6 +10,8 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     private Board board;
     private Vector3 correctPosition;
 
+    public bool IsCorrected { private set; get; } = false;
+
     private int numeric;
     public int Numeric
     {
@@ -42,7 +44,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     public void OnPointerClick(PointerEventData eventData)
     {
         // 클릭했을 때 행동
-        Debug.Log("click" + Numeric);
+        
         board.IsMoveTile(this);
     }
 
@@ -67,5 +69,9 @@ public class Tile : MonoBehaviour, IPointerClickHandler
 
             yield return null;  
         }
+
+        IsCorrected = correctPosition == GetComponent<RectTransform>().localPosition ? true : false;
+
+        board.IsGameOver();
     }
 }
