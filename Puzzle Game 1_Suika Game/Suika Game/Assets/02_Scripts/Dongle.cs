@@ -2,9 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 
 public class Dongle : MonoBehaviour
 {
+    private IObjectPool<Dongle> managedPool;
+
     public GameManager manager;
     public ParticleSystem effect;
     public Rigidbody2D rigid;
@@ -31,6 +34,11 @@ public class Dongle : MonoBehaviour
     private void OnEnable()
     {
         anim.SetInteger("Level", level);
+    }
+
+    public void SetManagedPool(IObjectPool<Dongle> pool)
+    {
+        managedPool = pool;
     }
 
     private void OnDisable()
@@ -168,7 +176,9 @@ public class Dongle : MonoBehaviour
         manager.score += (int)MathF.Pow(2, level); // Pow : 지정 숫자의 거듭 제곱
 
         isMerge = false;
-        gameObject.SetActive(false); // 이동이 다 끝났다면 오브젝트 비활성화
+        // 이동이 다 끝났다면 오브젝트 비활성화
+        // gameObject.SetActive(false); 
+        DestroyDongle();
     }
 
     private void LevelUp()
@@ -229,5 +239,10 @@ public class Dongle : MonoBehaviour
             deadTime = 0;
             spriteRenderer.color = Color.white;
         }
+    }
+
+    public void DestroyDongle()
+    {
+        managedPool.Release(this);
     }
 }

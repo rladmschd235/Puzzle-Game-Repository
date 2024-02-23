@@ -1,19 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+
     [Header("Core")]
     public bool isOver;
     public int score;
     public int maxLevel;
 
     [Header("Pooling")]
-    public List<Dongle> donglePool;
-    public List<ParticleSystem> effectPool;
+    // public List<Dongle> donglePool;
+    // public List<ParticleSystem> effectPool;
+    private IObjectPool<Dongle> pool_dongle;
     
     [Range(1, 30)]
     public int poolSize;
@@ -51,13 +54,15 @@ public class GameManager : MonoBehaviour
         Application.targetFrameRate = 60;
 
         // 풀 리스트 초기화
-        donglePool = new List<Dongle>();
-        effectPool = new List<ParticleSystem>();
+        // donglePool = new List<Dongle>();
+        // effectPool = new List<ParticleSystem>();
 
-        for(int i = 0; i < poolSize; i++)
-        {
-            MakeDongle();
-        }
+        pool_dongle = new ObjectPool<Dongle>(MakeDongle, GetDongle, ReleaseDongle, maxSize:poolSize);
+
+        //for(int i = 0; i < poolSize; i++)
+        //{
+        //    MakeDongle();
+        //}
 
         if(!PlayerPrefs.HasKey("maxScore"))
         {
@@ -90,36 +95,47 @@ public class GameManager : MonoBehaviour
     private Dongle MakeDongle()
     {
         // 이펙트 생성
-        GameObject instantEffectObj = Instantiate(effectPrefab, effectGroup);
-        instantEffectObj.name = "Effect " + effectPool.Count;
-        ParticleSystem instantEffect = instantEffectObj.GetComponent<ParticleSystem>();
-        effectPool.Add(instantEffect);
+        ParticleSystem effect = Instantiate(effectPrefab, effectGroup).GetComponent<ParticleSystem>();
+        effect.name = "Effect " + effect.particleCount;
 
         // 머지 오브젝트 생성
-        GameObject instantDongleObj = Instantiate(donglePrefab, dongleGroup);
-        instantDongleObj.name = "Dongle " + effectPool.Count;
-        Dongle instantDongle = instantDongleObj.GetComponent<Dongle>();
+        Dongle dongle = Instantiate(donglePrefab, dongleGroup).GetComponent<Dongle>();
+        dongle.name = "Dongle " + effect.particleCount;
+
+        dongle.manager = this;
+        dongle.effect = effect;
         
-        instantDongle.manager = this;
-        instantDongle.effect = instantEffect;
+        // effectPool.Add(instantEffect);
+        // donglePool.Add(instantDongle);
+        dongle.SetManagedPool(pool_dongle);
 
-        donglePool.Add(instantDongle);
-
-        return instantDongle;
+        return dongle;
     }
 
-    private Dongle GetDongle()
+    private void GetDongle(Dongle dongle)  
     {
-        for (int i = 0; i < donglePool.Count; i++)
-        {
-            poolCusor = (poolCusor + 1) % donglePool.Count;
-            if(!donglePool[poolCusor].gameObject.activeSelf) // 현재 가리키는 풀 오브젝트가 비활성화되어있는가
-            {
-                return donglePool[poolCusor];
-            }
-        }
+        //for (int i = 0; i < donglePool.Count; i++)
+        //{
+        //    poolCusor = (poolCusor + 1) % donglePool.Count;
+        //    if(!donglePool[poolCusor].gameObject.activeSelf) // 현재 가리키는 풀 오브젝트가 비활성화되어있는가
+        //    {
+        //        return donglePool[poolCusor];
+        //    }
+        //}
 
-        return MakeDongle(); // 모든 풀 오브젝트가 활성화 상태라면 풀 오브젝트 생성 함수 반환
+        //return MakeDongle(); // 모든 풀 오브젝트가 활성화 상태라면 풀 오브젝트 생성 함수 반환
+
+        dongle.gameObject.SetActive(true);
+    }
+
+    private void ReleaseDongle(Dongle dongle)
+    {
+        dongle.gameObject.SetActive(false);
+    }
+
+    private void DestroyBullet(Dongle dongle)
+    {
+        Destroy(dongle.gameObject);
     }
 
     private void NextDongle()
@@ -129,7 +145,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        lastDongle = GetDongle();
+        lastDongle = MakeDongle();
         lastDongle.level = Random.Range(0, maxLevel);
         lastDongle.gameObject.SetActive(true);
 
